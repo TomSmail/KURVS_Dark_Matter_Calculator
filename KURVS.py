@@ -5,6 +5,8 @@ import statistics
 from scipy.optimize import curve_fit
 import math
 
+from scipy.sparse.extract import find
+
 
 
 def openData():
@@ -58,26 +60,28 @@ def gaussian(xValues, Amp, mean, sd):
 def writeToGaussian(brightnessList):
     xdata = np.array(range(0, len(brightnessList))) #this creates an array of numbers in this length 0 - the length of the list
     passedData, pcov = curve_fit(gaussian, xdata, brightnessList) #this returns a list of values to be fit to the curve (mean) 
-    plt.plot(xdata, gaussian(xdata, *passedData)) #this passes all of the 
+    plt.plot(xdata, gaussian(xdata, *passedData)) #this passes all of the attributes from passedData
     plt.scatter(xdata, brightnessList)
     plt.show()
+    return passedData[1] #this returns the mean of the x values. 
 
 
 
 def removeHorizontalErrors(data):
     # --- THIS CODE REMOVES THE HORIZONTAL ERRORS FROM THE DATA SET, CAUSED BY INSTRUMENT ERRORS ---
     errorRows = []
-    print("Standard Deviation of lines:")
+    #print("Standard Deviation of lines:")
     for y in range(data.shape[0]): # this controlls the vertical, y, direction
         row = []
         for x in range(data.shape[1]): # this controlls the horizontal, x, direction
             row.append(data[y,x]) #appends data to rows for std 
-        print(statistics.stdev(row)) # checking
+        print(statistics.stdev(row)) # checking the sd
         if statistics.stdev(row) >= 10**-15: # start of working out if row should be removed
             errorRows.append(y)
-    print(errorRows)
+    #print(errorRows)
     data = np.delete(data, errorRows, 0) # removes the rows that have been identified as bad rows.
-    print(data)
+    #print("This is the data after it has been passed through removeHorizontalErrors")
+    #print(data)
     return data
 
 
@@ -85,19 +89,28 @@ def removeHorizontalErrors(data):
 def removeVerticalErrors(data):
     # --- THIS CODE REMOVES THE VERTICAL ERRORS FROM THE DATA SET, CAUSED BY THE ATMOSPHERE ---
     errorColumns = []
-    print("Standard Deviation of lines:")
+    #print("Standard Deviation of columns:")
     for x in range(data.shape[1]):# this controlls the horizontal, x, direction
         column = []
         for y in range(data.shape[0]):  # this controlls the vertical, y, direction
             column.append(data[y,x]) #appends data to rows for std 
-        print(statistics.stdev(column)) # checking
+        #print(statistics.stdev(column)) # checking
         if statistics.stdev(column) >= 10**-16: # start of working out if row should be removed
             errorColumns.append(x)
-    print("These are the columns with errors")
-    print(errorColumns)
+    #print("These are the columns with errors")
+    #print(errorColumns)
     data = np.delete(data, errorColumns, 0) # removes the rows that have been identified as bad rows.
-    print(data)
+    #print("This is the data after it has been passed through removeVerticalErrors")
+    #print(data)
     return data
+
+
+
+def findRedShift(mean):
+    meanpixle = 1.661539031658317 + (int(mean) * 0.000215820327866822)
+    emisionLineHParticle = 0.65628
+    redshift = ( meanpixle - emisionLineHParticle) / emisionLineHParticle
+    return redshift
 
 
 
@@ -106,7 +119,8 @@ def main():
     cleandata = removeHorizontalErrors(data)
     cleanestdata = removeVerticalErrors(cleandata)
     brightnessList, brightnessArray = twoDtooneD(cleanestdata)
-    writeToGaussian(brightnessList)
+    mean = writeToGaussian(brightnessList)
+    print(findRedShift(mean))
     #writeToGaussian(brightnessList, cleandata)
     #writeToGraph(brightnessArray, cleandata )
     #averageBrightness(brightnessList, brightnessArray)
