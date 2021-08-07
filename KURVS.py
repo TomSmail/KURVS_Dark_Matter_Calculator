@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import statistics
 from scipy.optimize import curve_fit
 import math
-
 from scipy.sparse.extract import find
 
 
@@ -25,8 +24,7 @@ def twoDtooneD(data):
         for j in range(data.shape[0]):
             datapoint += data[j,i]
         brightnessList.append(datapoint)
-        brightnessArray = np.array(brightnessList)
-    return brightnessList, brightnessArray
+    return brightnessList
 
 
 
@@ -78,10 +76,10 @@ def removeHorizontalErrors(data):
         print(statistics.stdev(row)) # checking the sd
         if statistics.stdev(row) >= 10**-15: # start of working out if row should be removed
             errorRows.append(y)
-    #print(errorRows)
+    print(errorRows)
     data = np.delete(data, errorRows, 0) # removes the rows that have been identified as bad rows.
     #print("This is the data after it has been passed through removeHorizontalErrors")
-    #print(data)
+    print(data)
     return data
 
 
@@ -95,13 +93,15 @@ def removeVerticalErrors(data):
         for y in range(data.shape[0]):  # this controlls the vertical, y, direction
             column.append(data[y,x]) #appends data to rows for std 
         #print(statistics.stdev(column)) # checking
-        if statistics.stdev(column) >= 10**-16: # start of working out if row should be removed
+        if statistics.stdev(column) >= 9**-16: # start of working out if row should be removed
             errorColumns.append(x)
     #print("These are the columns with errors")
-    #print(errorColumns)
-    data = np.delete(data, errorColumns, 0) # removes the rows that have been identified as bad rows.
+    print(errorColumns)
+    #data1 = np.delete(data, errorColumns, 0) # removes the rows that have been identified as bad rows.
+    for i in range(267):
+        np.put(data[i], errorColumns, 0)
     #print("This is the data after it has been passed through removeVerticalErrors")
-    #print(data)
+    print(data)
     return data
 
 
@@ -117,8 +117,9 @@ def findRedShift(mean):
 def main():
     data = openData()
     cleandata = removeHorizontalErrors(data)
+    print(cleandata)
     cleanestdata = removeVerticalErrors(cleandata)
-    brightnessList, brightnessArray = twoDtooneD(cleanestdata)
+    brightnessList = twoDtooneD(cleanestdata)
     mean = writeToGaussian(brightnessList)
     print(findRedShift(mean))
     #writeToGaussian(brightnessList, cleandata)
