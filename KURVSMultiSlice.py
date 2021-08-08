@@ -35,28 +35,27 @@ def splitSlices(data, errorRows):
                 slices.append(slice)
             cleanData =  cleanData[cleanData.index(row)+1 :]
     return slices
-   
 
     
 def sumEachSlice(slices): 
     sliceSums = []
     for wavelengthSlice in slices:
         sliceSums.append(twoDtooneD(wavelengthSlice))
-    print(sliceSums)
+
     return sliceSums
        
         
 
 def createGaussian(sliceSums):
-    for i in range(len(sliceSums)):
-        params = writeToGaussian(sliceSums[i])
+    for array in sliceSums:
+        params = writeToGaussian(array)
 
 
 
 def main():
     data = openData()
+    errorRows = horizontalLinesErrors(data)
     cleandata = removeVerticalErrors(data)
-    errorRows = horizontalLinesErrors(cleandata)
     slices = splitSlices(cleandata, errorRows)
     sliceSums = sumEachSlice(slices)
     print(sliceSums)

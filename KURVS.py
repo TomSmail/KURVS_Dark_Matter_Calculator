@@ -19,6 +19,8 @@ def openData():
 def twoDtooneD(data):
     # --- THIS CODE IS TO TURN THE 2D DATA ARRAY INTO A 1D ARRAY ---
     brightnessList = []
+    print("This is the Data Shape")
+    print(data.shape[1])
     for i in range(data.shape[1]):
         datapoint = 0
         for j in range(data.shape[0]):
@@ -79,30 +81,27 @@ def removeHorizontalErrors(data):
     print(errorRows)
     data = np.delete(data, errorRows, 0) # removes the rows that have been identified as bad rows.
     #print("This is the data after it has been passed through removeHorizontalErrors")
-    print(data)
+
     return data
 
 
 
 def removeVerticalErrors(data):
     # --- THIS CODE REMOVES THE VERTICAL ERRORS FROM THE DATA SET, CAUSED BY THE ATMOSPHERE ---
-    errorColumns = []
     #print("Standard Deviation of columns:")
     for x in range(data.shape[1]):# this controlls the horizontal, x, direction
         column = []
         for y in range(data.shape[0]):  # this controlls the vertical, y, direction
             column.append(data[y,x]) #appends data to rows for std 
         #print(statistics.stdev(column)) # checking
-        if statistics.stdev(column) >= 9**-16: # start of working out if row should be removed
-            errorColumns.append(x)
+        data1 = np.ma.masked_greater(data, 9**-16) # start of working out if row should be removed   
     #print("These are the columns with errors")
-    print(errorColumns)
     #data1 = np.delete(data, errorColumns, 0) # removes the rows that have been identified as bad rows.
-    for i in range(267):
-        np.put(data[i], errorColumns, 0)
     #print("This is the data after it has been passed through removeVerticalErrors")
-    print(data)
-    return data
+    print("This is the data after removeVerticalErrors")
+    print(data1)
+    print("This is the data after removeVerticalErrors")
+    return data1
 
 
 
